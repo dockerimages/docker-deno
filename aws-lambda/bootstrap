@@ -13,6 +13,15 @@ DENO_DIR=${DENO_DIR-'.deno_dir'}
 
 # TODO support bundle/js etc.
 HANDLER_FILE=${HANDLER_FILE}.ts
+# If the ENV is set to true then we execute the bundle file.
+# TODO: Also accept handler ext as an environment variable.
+DENO_USE_BUNDLE=${DENO_USE_BUNDLE-false}
+if [[ $DENO_USE_BUNDLE = 'true' ]] ;
+  # Not yet (?) supported
+  # HANDLER_FILE=${HANDLER_FILE}.bundle.js
+  then error 'bundle not yet supported';
+  else HANDLER_FILE=${HANDLER_FILE}.ts;
+fi;
 
 # If we fail prior to the handler loop we post an init error.
 function error {
@@ -124,6 +133,11 @@ mkdir -p /tmp/deno_dir/gen/file$LAMBDA_TASK_ROOT \
  && cp -R $LAMBDA_TASK_ROOT/$DENO_DIR/gen /tmp/deno_dir/gen &> /dev/null \
  && cp -R $LAMBDA_TASK_ROOT/$DENO_DIR/LAMBDA_TASK_ROOT/ /tmp/deno_dir/gen/file$LAMBDA_TASK_ROOT &> /dev/null \
  || echo "warn: unable to import '$DENO_DIR/' as DENO_DIR"
+
+# If DENO_USE_BUNDLE is misused, not true or false, we exit.
+if ! ( [[ $DENO_USE_BUNDLE = 'true' ]] || [[ $DENO_USE_BUNDLE = 'false' ]] ) ;
+  then error "if set DENO_USE_BUNDLE must be either true or false";
+fi;
 
 DENO_DIR=/tmp/deno_dir NO_COLOR=true $SCRIPT_DIR/amz-deno run --allow-net --allow-read --allow-env /tmp/runtime.js \
  || investigate
