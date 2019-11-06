@@ -11,15 +11,11 @@ API_ROOT=http://${AWS_LAMBDA_RUNTIME_API}/2018-06-01/runtime/
 # Note: For permissions reasons we need the actual DENO_DIR to be somewhere in /tmp.
 DENO_DIR=${DENO_DIR-'.deno_dir'}
 
-# TODO support bundle/js etc.
-HANDLER_FILE=${HANDLER_FILE}.ts
 # If the ENV is set to true then we execute the bundle file.
 # TODO: Also accept handler ext as an environment variable.
 DENO_USE_BUNDLE=${DENO_USE_BUNDLE-false}
 if [[ $DENO_USE_BUNDLE = 'true' ]] ;
-  # Not yet (?) supported
-  # HANDLER_FILE=${HANDLER_FILE}.bundle.js
-  then error 'bundle not yet supported';
+  then HANDLER_FILE=${HANDLER_FILE}.bundle.js;
   else HANDLER_FILE=${HANDLER_FILE}.ts;
 fi;
 
@@ -33,8 +29,7 @@ function error {
        --output /tmp/init.out
   # expect it to be {"status":"OK"}
   grep -q OK /tmp/init.out \
-   || (echo "Unexpected bootstrap error when calling AWS_LAMBDA_RUNTIME_API /init/error:" \
-       && cat /tmp/init.out)
+   || echo "Unexpected bootstrap error when calling AWS_LAMBDA_RUNTIME_API /init/error:" $(cat /tmp/init.out)
   exit 1
 }
 
@@ -52,13 +47,20 @@ function investigate {
   DENO_DIR=/tmp/deno_dir NO_COLOR=true $SCRIPT_DIR/amz-deno fetch $LAMBDA_TASK_ROOT/$HANDLER_FILE \
    || error "unable to compile $HANDLER_FILE"
 
-  echo "
+  if [[ $DENO_USE_BUNDLE = 'false' ]];
+  then echo "
   import { $HANDLER_NAME } from '$LAMBDA_TASK_ROOT/$HANDLER_FILE';
   " > /tmp/runtime-test.js
   DENO_DIR=/tmp/deno_dir NO_COLOR=true $SCRIPT_DIR/amz-deno fetch /tmp/runtime-test.js 2> /dev/null \
-   || error "$HANDLER_FILE must export a function named '$HANDLER_NAME'"
+   || error "$HANDLER_FILE must export a function named '$HANDLER_NAME'";
+  fi;
 
-  # perhaps a bug in bootstrap?
+  if [[ $DENO_USE_BUNDLE = 'true' ]] ;
+    # if using bundle we could see if an ENV variable is set. Or something to confirm we're using the lib.
+    then error "unhandled bundle error";
+  fi;
+
+  # perhaps a bug in bootstrap? Should we always exit 1?
 }
 
 # Note: This is a js file to avoid a runtime compilation step.
@@ -139,5 +141,9 @@ if ! ( [[ $DENO_USE_BUNDLE = 'true' ]] || [[ $DENO_USE_BUNDLE = 'false' ]] ) ;
   then error "if set DENO_USE_BUNDLE must be either true or false";
 fi;
 
-DENO_DIR=/tmp/deno_dir NO_COLOR=true $SCRIPT_DIR/amz-deno run --allow-net --allow-read --allow-env /tmp/runtime.js \
- || investigate
+if [[ $DENO_USE_BUNDLE = 'false' ]];
+then DENO_DIR=/tmp/deno_dir NO_COLOR=true $SCRIPT_DIR/amz-deno run --allow-net --allow-read --allow-env /tmp/runtime.js \
+ || investigate;
+else DENO_DIR=/tmp/deno_dir NO_COLOR=true $SCRIPT_DIR/amz-deno run --allow-net --allow-read --allow-env $LAMBDA_TASK_ROOT/$HANDLER_FILE \
+ || investigate;
+fi;
