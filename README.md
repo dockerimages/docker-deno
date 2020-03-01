@@ -2,18 +2,24 @@
 
 Docker files for [deno](https://github.com/denoland/deno).
 
-These are published on Dockerhub at [hayd/deno](https://hub.docker.com/r/hayd/deno).
+These are published on Dockerhub:
+
+- [hayd/alpine-deno](https://hub.docker.com/r/hayd/alpine-deno/) (\~23Mb)
+- [hayd/debian-deno](https://hub.docker.com/r/hayd/debian-deno/) (\~47Mb)
+- [hayd/ubuntu-deno](https://hub.docker.com/r/hayd/ubuntu-deno/) (\~48Mb)
 
 ![ci status](https://github.com/hayd/deno-docker/workflows/Test/badge.svg?branch=master)
 
-_The binary produced for Amazon Linux 1 can be used to run [deno on AWS Lambda](https://github.com/hayd/deno-lambda/)._
+_The amazonlinux1 build is used to run [deno on AWS Lambda](https://github.com/hayd/deno-lambda/)._
 
 ---
 
-For example:
+## Usage
+
+For example to run deno on alpine:
 
 ```Dockerfile
-FROM hayd/deno:alpine-0.35.0
+FROM hayd/alpine-deno:0.35.0
 
 EXPOSE 1993
 
