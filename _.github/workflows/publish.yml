@@ -7,7 +7,7 @@ jobs:
   build:
     strategy:
       matrix:
-        kind: ['alpine', 'amazonlinux1', 'centos', 'debian', 'ubuntu']
+        kind: ['stetch']
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v1
@@ -17,7 +17,7 @@ jobs:
     - name: Publish Docker
       uses: elgohr/Publish-Docker-Github-Action@2.7
       with:
-        name: "hayd/${{ matrix.kind }}-deno:${{ steps.get_version.outputs.VERSION }}"
+        name: "dockerimages/${{ matrix.kind }}-deno:${{ steps.get_version.outputs.VERSION }}"
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_PASSWORD }}
         dockerfile: ${{ matrix.kind }}.dockerfile
@@ -27,7 +27,7 @@ jobs:
       if: matrix.kind != 'amazonlinux1'
       uses: elgohr/Publish-Docker-Github-Action@2.7
       with:
-        name: "hayd/deno:${{ matrix.kind }}-${{ steps.get_version.outputs.VERSION }}"
+        name: "dockerimages/deno:${{ steps.get_version.outputs.VERSION }}-${{ matrix.kind }}"
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_PASSWORD }}
         dockerfile: ${{ matrix.kind }}.dockerfile

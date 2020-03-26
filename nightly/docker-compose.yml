@@ -1,0 +1,20 @@
+version: '3.2'
+
+services:
+  cache:
+    build:
+      context: .
+      dockerfile: ./cache.build.dockerfile
+    image: dockerimages/deno:_build-cache
+  master:
+    build: 
+      context: .
+      dockerfile: ./master.dockerfile
+    image: dockerimages/deno:master
+  stretch-slim:
+    build: 
+      context: .
+      dockerfile: stretch-slim.build.dockerfile
+      args:
+        DENO_VERSION: 0.2.4
+    image: dockerimages/deno:master-stretch-slim

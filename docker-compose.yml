@@ -1,0 +1,10 @@
+version: '3.2'
+
+services:
+  latests:
+    build: 
+      context: ./0/stretch/
+      dockerfile: Dockerfile
+      args:
+        DENO_VERSION: 0.37.1
+    image: dockerimages/deno:latest

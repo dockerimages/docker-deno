@@ -1,7 +1,7 @@
 The CMD line in the Dockerfile determines parameters passed to Deno.
 
 ```
-CMD ["run", "--allow-net", "main.ts"]
+CMD ["deno","run", "--allow-net", "main.ts"]
 ```
 
 Note: That the listen port (1993), must match with the EXPOSED port in the Dockerfile.

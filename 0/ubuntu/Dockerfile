@@ -1,6 +1,6 @@
-FROM ubuntu:bionic-20200219
+FROM buildpack-deps:focal-curl
 
-ENV DENO_VERSION=0.37.0
+ARG DENO_VERSION=0.37.1
 
 RUN apt-get -qq update \
  && apt-get upgrade -y -o Dpkg::Options::="--force-confold" \
@@ -20,6 +20,7 @@ RUN useradd --uid 1993 --user-group deno \
 
 ENV DENO_DIR /deno-dir/
 
+COPY docker-entrypoint.sh /usr/local/bin/
+ENTRYPOINT ["docker-entrypoint.sh"]
 
-ENTRYPOINT ["deno"]
-CMD ["https://deno.land/std/examples/welcome.ts"]
+CMD ["deno","https://deno.land/std/examples/welcome.ts"]
